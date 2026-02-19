@@ -3,34 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Library Logbook 2026</title>
+<title>Library Visitor Logbook 2026</title>
 
 <style>
 body {
     font-family: Arial, sans-serif;
-    background: #f4f4f4;
     margin: 0;
-    padding: 0;
+    background: #f4f4f4;
 }
 header {
-    background: #3e5998;
+    background: #2c3e50;
     color: white;
     text-align: center;
     padding: 15px;
 }
 .container {
+    max-width: 1100px;
     margin: 20px auto;
-    max-width: 1000px;
+    padding: 15px;
 }
-form {
+form, .admin-panel {
     background: white;
     padding: 20px;
     border-radius: 8px;
 }
 label {
+    font-weight: bold;
     display: block;
     margin-top: 10px;
-    font-weight: bold;
 }
 input, select, textarea {
     width: 100%;
@@ -38,28 +38,47 @@ input, select, textarea {
     margin-top: 5px;
 }
 button {
-    padding: 10px;
     margin-top: 15px;
-    background: #3e5998;
+    padding: 10px;
+    background: #2c3e50;
     color: white;
     border: none;
     cursor: pointer;
 }
-button:hover { background: #2d4070; }
+button:hover { background: #1a252f; }
+
+.counter-box {
+    background: #27ae60;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 18px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 th, td {
     border: 1px solid #ccc;
-    padding: 8px;
-    text-align: left;
+    padding: 6px;
 }
-th { background: #3e5998; color: white; }
-</style>
+th { background: #2c3e50; color: white; }
 
+.hidden { display: none; }
+
+.stat-box {
+    background: #ecf0f1;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 6px;
+}
+</style>
 </head>
+
 <body>
 
 <header>
@@ -68,7 +87,12 @@ th { background: #3e5998; color: white; }
 
 <div class="container">
 
-<!-- FORM -->
+<!-- DAILY COUNTER -->
+<div class="counter-box">
+    Today's Visitors: <span id="dailyCount">0</span>
+</div>
+
+<!-- VISITOR FORM -->
 <form id="visitorForm">
     <h2>Visitor Sign-In</h2>
 
@@ -91,165 +115,155 @@ th { background: #3e5998; color: white; }
     <label>Age *</label>
     <input type="number" id="age" required>
 
-    <label>Brgy / City or Municipality *</label>
-    <input type="text" id="brgyCity" required>
-
-    <label>Barangay *</label>
-    <input type="text" id="barangay" required>
-
     <label>City/Municipality *</label>
-    <select id="cityMunicipality" required>
-        <option value="">Select...</option>
-        <option>Tabaco City</option>
-        <option>Bacacay</option>
-        <option>Malinao</option>
-        <option>Sto. Domingo</option>
-        <option>Malilipot</option>
-        <option>Tiwi</option>
-        <option>Ligao</option>
-        <option>Legazpi</option>
-    </select>
+    <input type="text" id="city" required>
 
-    <label>Province *</label>
-    <input type="text" id="province" value="Albay" required>
-
-    <label>Sector / Groups *</label>
+    <label>Sector *</label>
     <select id="sector" required>
         <option value="">Select...</option>
         <option>Children</option>
-        <option>Elementary</option>
         <option>High School</option>
         <option>College</option>
-        <option>Graduate School</option>
-        <option>Professionals</option>
-        <option>Out of School Youth</option>
+        <option>Professional</option>
         <option>Elderly</option>
-        <option>City Personnel</option>
-        <option>Other</option>
     </select>
 
-    <label>Name of School / Office / Agency *</label>
-    <input type="text" id="schoolOffice" required>
+    <label>School / Office *</label>
+    <input type="text" id="school" required>
 
-    <label>What resources are you going to use? *</label>
-    <textarea id="resources" placeholder="e.g. COMPUTER USE / INTERNET, TEXTBOOKS" required></textarea>
+    <label>Resources to Use *</label>
+    <textarea id="resources" required></textarea>
 
     <button type="submit">Submit</button>
 </form>
 
-<!-- CONTROLS -->
-<div style="margin-top: 20px;">
-    <input type="text" id="search" placeholder="Search records...">
-    <button onclick="exportCSV()">Export CSV</button>
-    <button onclick="clearRecords()">Clear All</button>
-</div>
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="admin-panel hidden">
+    <h2>Admin Dashboard</h2>
 
-<!-- TABLE -->
-<table id="visitorTable">
-    <thead>
-        <tr>
-            <th>Name</th><th>Sex</th><th>Age</th><th>Address</th>
-            <th>Sector</th><th>School/Office</th><th>Resources</th>
-            <th>Date</th><th>Time In</th><th>Time Out</th><th>Action</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+    <button onclick="exportCSV()">Export CSV</button>
+
+    <div class="stat-box">
+        <strong>Total Visitors (All Time):</strong> <span id="totalVisitors"></span>
+    </div>
+
+    <div class="stat-box">
+        <strong>Male Visitors:</strong> <span id="maleCount"></span><br>
+        <strong>Female Visitors:</strong> <span id="femaleCount"></span>
+    </div>
+
+    <div class="stat-box">
+        <strong>Visitors by Sector:</strong>
+        <div id="sectorStats"></div>
+    </div>
+
+    <table id="visitorTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Sex</th>
+                <th>Age</th>
+                <th>City</th>
+                <th>Sector</th>
+                <th>School</th>
+                <th>Resources</th>
+                <th>Date</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
 
 </div>
 
 <script>
-// SAVE & LOAD
+
+const ADMIN_PASSWORD = "admin123";
+
+// DAILY RESET CHECK
+function checkDailyReset() {
+    const today = new Date().toLocaleDateString();
+    const lastDate = localStorage.getItem("lastVisitDate");
+
+    if (lastDate !== today) {
+        localStorage.setItem("dailyCount", 0);
+        localStorage.setItem("lastVisitDate", today);
+    }
+
+    document.getElementById("dailyCount").innerText =
+        localStorage.getItem("dailyCount") || 0;
+}
+
+// SAVE VISITOR
 document.getElementById("visitorForm").addEventListener("submit", function(e) {
     e.preventDefault();
+
     const now = new Date();
     const record = {
         id: Date.now(),
-        lastName: document.getElementById("lastName").value.trim(),
-        firstName: document.getElementById("firstName").value.trim(),
-        middleName: document.getElementById("middleName").value.trim(),
+        name: document.getElementById("lastName").value + ", " +
+              document.getElementById("firstName").value + " " +
+              document.getElementById("middleName").value,
         sex: document.getElementById("sex").value,
         age: document.getElementById("age").value,
-        brgyCity: document.getElementById("brgyCity").value,
-        barangay: document.getElementById("barangay").value,
-        cityMunicipality: document.getElementById("cityMunicipality").value,
-        province: document.getElementById("province").value,
+        city: document.getElementById("city").value,
         sector: document.getElementById("sector").value,
-        schoolOffice: document.getElementById("schoolOffice").value,
+        school: document.getElementById("school").value,
         resources: document.getElementById("resources").value,
         date: now.toLocaleDateString(),
-        timeIn: now.toLocaleTimeString(),
-        timeOut: ""
+        time: now.toLocaleTimeString()
     };
+
     let records = JSON.parse(localStorage.getItem("visitors")) || [];
     records.push(record);
     localStorage.setItem("visitors", JSON.stringify(records));
-    loadRecords();
+
+    // update daily counter
+    let count = parseInt(localStorage.getItem("dailyCount")) || 0;
+    count++;
+    localStorage.setItem("dailyCount", count);
+
     this.reset();
+    checkDailyReset();
 });
 
-function loadRecords() {
-    const tbody = document.querySelector("#visitorTable tbody");
-    tbody.innerHTML = "";
-    const records = JSON.parse(localStorage.getItem("visitors")) || [];
-    records.forEach(r => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${r.lastName}, ${r.firstName} ${r.middleName}</td>
-            <td>${r.sex}</td><td>${r.age}</td>
-            <td>${r.brgyCity}, ${r.barangay}, ${r.cityMunicipality}, ${r.province}</td>
-            <td>${r.sector}</td><td>${r.schoolOffice}</td>
-            <td>${r.resources}</td><td>${r.date}</td>
-            <td>${r.timeIn}</td><td>${r.timeOut || "-"}</td>
-            <td><button onclick="timeOut(${r.id})">Time Out</button></td>`;
-        tbody.appendChild(row);
-    });
-}
-
-// TIME OUT
-function timeOut(id) {
-    let records = JSON.parse(localStorage.getItem("visitors")) || [];
-    records = records.map(r => {
-        if (r.id === id && !r.timeOut) r.timeOut = new Date().toLocaleTimeString();
-        return r;
-    });
-    localStorage.setItem("visitors", JSON.stringify(records));
-    loadRecords();
-}
-
-// SEARCH
-document.getElementById("search").addEventListener("input", function() {
-    const text = this.value.toLowerCase();
-    document.querySelectorAll("#visitorTable tbody tr").forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(text) ? "" : "none";
-    });
-});
-
-// EXPORT CSV
-function exportCSV() {
-    const records = JSON.parse(localStorage.getItem("visitors")) || [];
-    let csv = "Name,Sex,Age,Address,Sector,SchoolOffice,Resources,Date,TimeIn,TimeOut\n";
-    records.forEach(r => {
-        csv += `"${r.lastName}, ${r.firstName}","${r.sex}",${r.age},"${r.brgyCity} ${r.barangay} ${r.cityMunicipality}","${r.sector}","${r.schoolOffice}","${r.resources}",${r.date},${r.timeIn},${r.timeOut}\n`;
-    });
-    const blob = new Blob([csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "library_log.csv";
-    link.click();
-}
-
-// CLEAR DATA
-function clearRecords() {
-    if (confirm("Delete all records?")) {
-        localStorage.removeItem("visitors");
-        loadRecords();
+// ADMIN ACCESS (#admin)
+if (window.location.hash === "#admin") {
+    const pass = prompt("Enter Admin Password:");
+    if (pass === ADMIN_PASSWORD) {
+        document.getElementById("adminPanel").classList.remove("hidden");
+        loadAdminData();
+    } else {
+        alert("Wrong password.");
     }
 }
 
-window.onload = loadRecords;
+// LOAD ADMIN DATA
+function loadAdminData() {
+    const records = JSON.parse(localStorage.getItem("visitors")) || [];
+    const tbody = document.querySelector("#visitorTable tbody");
+    tbody.innerHTML = "";
 
-</script>
+    let male = 0;
+    let female = 0;
+    let sectorCounts = {};
 
-</body>
-</html>
+    records.forEach(r => {
+        if (r.sex === "Male") male++;
+        if (r.sex === "Female") female++;
+
+        sectorCounts[r.sector] = (sectorCounts[r.sector] || 0) + 1;
+
+        const row = `<tr>
+            <td>${r.name}</td>
+            <td>${r.sex}</td>
+            <td>${r.age}</td>
+            <td>${r.city}</td>
+            <td>${r.sector}</td>
+            <td>${r.school}</td>
+            <td>${r.resources}</td>
+            <td>${r.date}</td>
+            <td>${r.time}</td>
+        </tr>`;
+        tbody
